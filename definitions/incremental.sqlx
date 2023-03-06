@@ -1,0 +1,25 @@
+config {
+  schema: "dataform_incremental",
+  type: "incremental",
+  uniqueKey: ["minute"],
+  bigquery: {
+    partitionBy: "DATETIME_TRUNC(minute, HOUR)",
+    updatePartitionFilter: "minute >= DATETIME_SUB(CURRENT_DATETIME(), INTERVAL 20 MINUTE)",
+  }
+}
+
+WITH data AS (
+  SELECT
+    DATETIME(minute, 'Asia/Tokyo') AS minute,
+    CURRENT_DATETIME('Asia/Tokyo') AS generated_at,
+  FROM UNNEST (GENERATE_TIMESTAMP_ARRAY(
+    TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MINUTE),
+    TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 9 MINUTE),
+    INTERVAL 1 MINUTE
+  )) AS minute
+)
+
+SELECT
+  *
+FROM
+  data
