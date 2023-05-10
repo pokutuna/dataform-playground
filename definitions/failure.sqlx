@@ -1,6 +1,5 @@
 config {
   type: "table",
-  uniqueKey: "hoge", // array expected
 }
 
 SELECT * FROM hoge
