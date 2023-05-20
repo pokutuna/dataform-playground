@@ -1,0 +1,5 @@
+config {
+  type: "table"
+}
+
+SELECT ST_GEOGFROMGEOJSON('{"type":"Point","coordinates":[0,0]}', make_valid => TRUE)

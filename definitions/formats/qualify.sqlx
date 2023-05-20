@@ -1,0 +1,13 @@
+config {
+  type: "table"
+}
+
+WITH table AS (
+  SELECT * FROM UNNEST(['a','b','c', 'd', 'e']) AS char
+)
+
+SELECT
+  ROW_NUMBER() OVER() AS num,
+  char,
+FROM table
+QUALIFY MOD(num, 2) = 0
