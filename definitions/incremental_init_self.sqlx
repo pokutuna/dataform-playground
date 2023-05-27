@@ -4,6 +4,23 @@ config {
   uniqueKey: ["minute"],
 }
 
+WITH data AS (
+  SELECT
+    DATETIME(minute, 'Asia/Tokyo') AS minute,
+    CURRENT_DATETIME('Asia/Tokyo') AS generated_at,
+  FROM
+    UNNEST (
+      GENERATE_TIMESTAMP_ARRAY(
+        TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MINUTE),
+        TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 9 MINUTE),
+        INTERVAL 1 MINUTE
+      )
+    ) AS minute
+)
+SELECT
+  *
+FROM
+  data
 
 pre_operations {
   DECLARE max_minute DATETIME;
@@ -14,25 +31,12 @@ pre_operations {
   --   FROM
   --     ${self()}
   -- );
-  SET max_minute = (
-    ${when(incremental(),
-      `SELECT MAX(minute) FROM ${self()}`,
-      'SELECT DATETIME("1980-01-01 00:00:00")')}
-  );
+  SET
+    max_minute = (
+    ${
+      when(incremental(),
+        `SELECT MAX(minute) FROM ${self()}`,
+        'SELECT DATETIME("1980-01-01 00:00:00")')
+    }
+    );
 }
-
-WITH data AS (
-  SELECT
-    DATETIME(minute, 'Asia/Tokyo') AS minute,
-    CURRENT_DATETIME('Asia/Tokyo') AS generated_at,
-  FROM UNNEST (GENERATE_TIMESTAMP_ARRAY(
-    TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MINUTE),
-    TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 9 MINUTE),
-    INTERVAL 1 MINUTE
-  )) AS minute
-)
-
-SELECT
-  *
-FROM
-  data

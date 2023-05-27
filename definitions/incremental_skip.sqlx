@@ -8,23 +8,35 @@ config {
 -- incremental テーブルが頻繁に更新されるとコストがかさむ
 -- 最終更新時刻から一定時間経過しない場合は incremental テーブルの更新をスキップしたい
 WITH params AS (
-  ${when(incremental(),
+${
+  when(incremental(),
     `SELECT CURRENT_TIMESTAMP() < TIMESTAMP_ADD(MAX(generated_at), INTERVAL 3 MINUTE) AS skip FROM ${self()}`,
     'SELECT FALSE AS skip'
-  )}
-), data AS (
+  )
+}
+),
+data AS (
   SELECT
-    EXTRACT(MINUTE FROM minute AT TIME ZONE 'Asia/Tokyo') AS minute,
+    EXTRACT(
+      MINUTE
+      FROM
+        minute AT TIME ZONE 'Asia/Tokyo'
+    ) AS minute,
     CURRENT_TIMESTAMP() AS generated_at,
-  FROM UNNEST (GENERATE_TIMESTAMP_ARRAY(
-    TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MINUTE),
-    TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 9 MINUTE),
-    INTERVAL 1 MINUTE
-  )) AS minute
+  FROM
+    UNNEST (
+      GENERATE_TIMESTAMP_ARRAY(
+        TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MINUTE),
+        TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 9 MINUTE),
+        INTERVAL 1 MINUTE
+      )
+    ) AS minute
 )
-
 SELECT
-  * EXCEPT(skip)
+  *
+EXCEPT(skip)
 FROM
-  data, params
-WHERE skip IS FALSE
+  data,
+  params
+WHERE
+  skip IS FALSE

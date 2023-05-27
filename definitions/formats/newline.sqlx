@@ -1,0 +1,6 @@
+config {
+  type: "table"
+}
+
+SELECT
+  "a\n  b\n    c\n"

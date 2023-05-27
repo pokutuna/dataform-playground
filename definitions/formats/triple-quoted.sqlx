@@ -3,6 +3,8 @@ config {
 }
 
 SELECT
-  '''
-This is a triple-quoted string.
-''' as str
+  ''
+  '
+  This is a triple-quoted string.
+  '
+  '' as str
